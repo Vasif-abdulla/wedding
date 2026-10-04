@@ -1,0 +1,6 @@
+# Reception invitation — a private celebration, but nothing here is secret.
+User-agent: *
+Allow: /
+
+# Update to your real domain before deploying.
+Sitemap: https://example.com/sitemap.xml

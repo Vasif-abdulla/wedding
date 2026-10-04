@@ -1,0 +1,315 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { bride, groom, wedding } from '../../data/wedding'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
+import { starPoints } from '../ui/Ornaments'
+
+const DEBUG_MUSIC = true
+
+function logMusic(message: string, details?: Record<string, unknown>) {
+  if (!DEBUG_MUSIC) return
+  console.log('[music]', message, details ?? '')
+}
+
+interface PreloaderProps {
+  /** Fires on the earliest user interaction that indicates they are opening. */
+  onMusicIntent: () => void
+  /** Fires the instant the button is pressed — the doors are about to part, so
+      whatever is underneath needs to be visible *now*. */
+  onOpenStart: () => void
+  /** Fires once the doors have finished parting and this screen can retire. */
+  onOpen: () => void
+}
+
+/**
+ * The seal, drawn stroke by stroke — in CSS.
+ *
+ * `pathLength="1"` normalises every shape to a unit length so a single
+ * dasharray rule animates circles, rects and polygons identically. Each element
+ * carries its own `--d` delay, following the order a hand would actually
+ * construct an 8-fold rosette: rings, then the two generating squares, then the
+ * rosette inside them.
+ */
+function DrawnSeal() {
+  const el = (delay: number, opacity = 1) =>
+    ({ '--d': `${delay}s`, '--o': opacity }) as React.CSSProperties
+
+  return (
+    <svg viewBox="0 0 200 200" fill="none" className="seal-draw h-full w-full">
+      <g
+        stroke="currentColor"
+        strokeWidth="0.9"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        fill="none"
+      >
+        <circle data-draw cx="100" cy="100" r="92" pathLength="1" style={el(0, 0.3)} />
+        <circle data-draw cx="100" cy="100" r="84" pathLength="1" style={el(0.15, 0.5)} />
+
+        {/* The generating squares */}
+        <rect data-draw x="42" y="42" width="116" height="116" pathLength="1" style={el(0.5)} />
+        <rect
+          data-draw
+          x="42"
+          y="42"
+          width="116"
+          height="116"
+          transform="rotate(45 100 100)"
+          pathLength="1"
+          style={el(0.75)}
+        />
+
+        {/* Rosette */}
+        <polygon
+          data-draw
+          points={starPoints(100, 100, 60, 24.8, 8)}
+          pathLength="1"
+          style={el(1.05, 0.75)}
+        />
+        <polygon
+          data-draw
+          points={starPoints(100, 100, 30, 12.4, 8)}
+          pathLength="1"
+          style={el(1.3, 0.5)}
+        />
+        <circle data-draw cx="100" cy="100" r="14" pathLength="1" style={el(1.5, 0.4)} />
+      </g>
+    </svg>
+  )
+}
+
+/**
+ * The invitation opening experience.
+ *
+ * Deliberately built without Framer Motion. This is the first paint, and
+ * pulling Motion into the entry chunk cost ~3.2s of scripting on a throttled
+ * mobile CPU — the seal couldn't appear until an animation library had parsed,
+ * which is exactly backwards. Plain CSS runs it, and the rest of the site
+ * streams in behind this screen while the guest reads the Bismillah.
+ *
+ * Sequence: the seal draws while the Bismillah and monogram rise → the button
+ * arrives. On "Open Invitation" the seal blooms outward and two emerald panels
+ * part like doors, revealing the Hero beneath.
+ */
+export function Preloader({ onMusicIntent, onOpenStart, onOpen }: PreloaderProps) {
+  const prefersReduced = useReducedMotion()
+  const [opening, setOpening] = useState(false)
+  const openedRef = useRef(false)
+
+  const handleOpen = useCallback(() => {
+    if (openedRef.current) return
+    openedRef.current = true // ref, not state: the listeners below close over
+    logMusic('preloader opening')
+    setOpening(true) //          the first render and would re-fire otherwise
+    onMusicIntent()
+    onOpenStart() // reveal the Hero before the doors expose it
+    // Hand off just before the panels finish, so Hero is already fading up
+    window.setTimeout(onOpen, prefersReduced ? 0 : 1150)
+  }, [onMusicIntent, onOpen, onOpenStart, prefersReduced])
+
+  const d = (delay: number) => ({ '--d': `${prefersReduced ? 0 : delay}s` }) as React.CSSProperties
+
+  /**
+   * Scroll to open.
+   *
+   * The page is locked while this screen is up, so native `scroll` never fires.
+   * Wheel, touchmove and keyboard scroll keys are opening gestures. Pointerdown
+   * also opens because browsers require a tap/click-style activation for audio.
+   */
+  useEffect(() => {
+    if (prefersReduced) return
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      logMusic('preloader pointerdown open', { pointerType: e.pointerType })
+      onMusicIntent()
+      handleOpen()
+    }
+    const onClick = () => {
+      logMusic('preloader click unlock')
+      onMusicIntent()
+    }
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY > 0) {
+        logMusic('preloader wheel open', { deltaY: e.deltaY })
+        onMusicIntent()
+        handleOpen()
+      }
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'PageDown', ' ', 'Spacebar', 'Enter'].includes(e.key)) {
+        logMusic('preloader key open', { key: e.key })
+        onMusicIntent()
+        handleOpen()
+      }
+    }
+    let touchStart = 0
+    const onTouchStart = (e: TouchEvent) => {
+      touchStart = e.touches[0]?.clientY ?? 0
+      logMusic('preloader touchstart', { touchStart })
+      onMusicIntent()
+    }
+    const onTouchEnd = () => {
+      logMusic('preloader touchend unlock')
+      onMusicIntent()
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      const distance = touchStart - (e.touches[0]?.clientY ?? 0)
+      if (distance > 24) {
+        logMusic('preloader touchmove open', { distance })
+        handleOpen()
+      }
+    }
+
+    window.addEventListener('pointerdown', onPointerDown, { passive: true })
+    window.addEventListener('click', onClick, { passive: true })
+    window.addEventListener('wheel', onWheel, { passive: true })
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('click', onClick)
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchend', onTouchEnd)
+      window.removeEventListener('touchmove', onTouchMove)
+    }
+  }, [handleOpen, onMusicIntent, prefersReduced])
+
+  return (
+    <div
+      /*
+        No background on the root — the two door panels already span 101% of
+        the width between them. A background here would stay put while the
+        doors slid away, so they'd part to reveal more emerald instead of the
+        Hero underneath.
+      */
+      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden ${
+        opening ? 'is-opening pointer-events-none' : ''
+      }`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Open the invitation"
+    >
+      {/* --- Doors: two panels that part on open ---------------------------- */}
+      {(['left', 'right'] as const).map((side) => (
+        <div
+          key={side}
+          className={`pl-door absolute inset-y-0 w-[50.5%] bg-emerald-deep ${
+            side === 'left' ? 'pl-door-l left-0' : 'pl-door-r right-0'
+          }`}
+        >
+          {/* Layered depth: girih weave over a warm radial pool. The pattern is
+              a CSS background rather than an <svg> so it costs no DOM. */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(14,90,78,0.9),#083830_70%)]" />
+          <div className="pl-girih absolute inset-0 opacity-[0.14]" />
+          {/* Gold seam where the doors meet — hidden until they part, or it
+              reads as a scratch down the middle of the seal. */}
+          <div
+            className={`pl-seam absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-gold/60 to-transparent ${
+              side === 'left' ? 'right-0' : 'left-0'
+            }`}
+          />
+        </div>
+      ))}
+
+      {/* --- Content -------------------------------------------------------- */}
+      <div className="pl-content relative z-10 flex flex-col items-center px-6 text-center">
+        {/* Seal + monogram */}
+        <div className="relative mb-9 flex h-52 w-52 items-center justify-center md:h-64 md:w-64">
+          <div className="pl-seal absolute inset-0 text-gold">
+            <DrawnSeal />
+          </div>
+
+          {/* Monogram — groom's initial first, matching the Hero, the Footer
+              and the boot shell in index.html.
+
+              Two things must stay in sync with that shell: the ORDER (a flip
+              here is visible the instant React takes over from the static
+              markup) and the SIZE — if the shell's copy is smaller, this one
+              paints later as a larger element and steals the Largest
+              Contentful Paint. */}
+          <div
+            className="pl-scale pointer-events-none absolute inset-0 flex items-center justify-center"
+            style={d(0.15)}
+          >
+            <div className="relative flex items-center justify-center">
+              <span className="display w-14 pr-3 text-right text-5xl leading-none text-ivory md:w-16 md:pr-3.5 md:text-6xl">
+                {groom.initial}
+              </span>
+              <svg viewBox="0 0 12 12" className="h-2 w-2 shrink-0 text-gold" aria-hidden="true">
+                <path d="M6 0 L12 6 L6 12 L0 6 Z" fill="currentColor" />
+              </svg>
+              <span className="display w-14 pl-3 text-left text-5xl leading-none text-ivory md:w-16 md:pl-3.5 md:text-6xl">
+                {bride.initial}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bismillah */}
+        <div className="pl-rise flex flex-col items-center gap-4" style={d(0.45)}>
+          <p className="arabic text-xl text-gold/90 md:text-2xl" lang="ar">
+            {wedding.bismillah.arabic}
+          </p>
+          <p className="max-w-sm text-[0.7rem] leading-relaxed font-light tracking-[0.08em] text-balance text-ivory/60">
+            {wedding.bismillah.translation}
+          </p>
+        </div>
+
+        {/* Rule */}
+        <div
+          className="pl-rule my-8 h-px w-40 bg-gradient-to-r from-transparent via-gold/70 to-transparent"
+          style={d(0.65)}
+        />
+
+        {/* Invitation line */}
+        <p
+          className="pl-rise display mb-10 text-[clamp(1.75rem,5vw,2.75rem)] leading-tight font-light text-ivory italic"
+          style={d(0.8)}
+        >
+          You are cordially invited
+        </p>
+
+        {/*
+          The cue is a real <button>, not just a visual hint, so guests can
+          open the invitation by click, tap, scroll, keyboard, or screen reader.
+        */}
+        <button
+          type="button"
+          onPointerDown={() => {
+            logMusic('open button pointerdown')
+            onMusicIntent()
+          }}
+          onClick={handleOpen}
+          style={d(1)}
+          className="pl-rise group flex flex-col items-center gap-4 bg-transparent focus-visible:outline-gold"
+        >
+          <span className="font-body text-[0.62rem] font-light tracking-[0.34em] text-gold/90 uppercase transition-colors duration-500 group-hover:text-gold">
+            Tap or scroll to open
+          </span>
+
+          {/* A gold thread falling into a chevron — the page's own language for
+              "there is more below". */}
+          <span className="relative flex h-14 w-4 items-center justify-center" aria-hidden="true">
+            <span className="pl-thread absolute top-0 h-8 w-px bg-gradient-to-b from-transparent via-gold/70 to-gold" />
+            <span className="pl-cue absolute bottom-0 text-gold">
+              <ChevronDown className="h-4 w-4" strokeWidth={1} />
+            </span>
+          </span>
+        </button>
+
+        <p
+          className="pl-rise mt-4 text-[0.55rem] font-light tracking-[0.3em] text-ivory/35 uppercase"
+          style={d(1.35)}
+        >
+          {wedding.dateLabel}
+        </p>
+      </div>
+    </div>
+  )
+}
