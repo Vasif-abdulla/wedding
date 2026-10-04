@@ -213,11 +213,11 @@ export const contact = {
   whatsapp: '918590792535',
   /** Shown in the footer and dialable on mobile. */
   phones: ['+91 85907 92535', '+91 95449 59594'],
-  email: 'salmanulfariz@gmail.com',
+  email: 'salmanulfarizpathiyil@gmail.com',
 } as const
 
 export const socials: SocialLink[] = [
-  { label: 'Email us', href: 'mailto:salmanulfariz@gmail.com', icon: 'mail' },
+  { label: 'Email us', href: 'mailto:salmanulfarizpathiyil@gmail.com', icon: 'mail' },
   { label: 'Call us', href: 'tel:+918590792535', icon: 'phone' },
 ]
 

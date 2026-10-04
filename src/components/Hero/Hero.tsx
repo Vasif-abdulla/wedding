@@ -123,7 +123,7 @@ export function Hero({ active, onScrollCue }: HeroProps) {
           initial="hidden"
           animate={show}
           variants={{ visible: { transition: { staggerChildren: 0.13, delayChildren: 0.25 } } }}
-          className="flex max-w-2xl flex-col items-center"
+          className="flex max-w-3xl flex-col items-center"
         >
           {/* Eyebrow */}
           <motion.div
@@ -145,10 +145,10 @@ export function Hero({ active, onScrollCue }: HeroProps) {
           <motion.h1
             variants={rise}
             transition={{ duration: 1.1, ease: EASE }}
-            className="display flex flex-col items-center leading-[0.9] text-ivory"
+            className="display flex flex-col items-center leading-[0.95] text-ivory"
             style={{ textShadow: '0 0 60px rgba(8,56,48,0.55), 0 2px 18px rgba(8,56,48,0.35)' }}
           >
-            <span className="text-[clamp(3.4rem,13vw,9rem)]">{groom.firstName}</span>
+            <span className="text-[clamp(2.2rem,7.5vw,5.5rem)]">{groom.fullName}</span>
 
             {/* Ampersand, flanked by rules */}
             <motion.span
@@ -159,7 +159,7 @@ export function Hero({ active, onScrollCue }: HeroProps) {
               <span className="foil animate-foil text-[clamp(1.75rem,4.5vw,3rem)] italic">&amp;</span>
             </motion.span>
 
-            <span className="text-[clamp(3.4rem,13vw,9rem)]">{bride.firstName}</span>
+            <span className="text-[clamp(2.2rem,7.5vw,5.5rem)]">{bride.fullName}</span>
           </motion.h1>
 
           {/* Date */}
