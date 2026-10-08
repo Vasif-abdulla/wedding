@@ -282,9 +282,16 @@ export function CoupleNames() {
               <span className="mb-1 block text-[0.52rem] tracking-[0.28em] text-gold-deep uppercase">
                 Beloved child of
               </span>
-              {person.father}
-              <span className="mx-1.5 text-gold">&amp;</span>
-              {person.mother}
+              <div>
+                {person.father}
+                <span className="mx-1.5 text-gold">&amp;</span>
+                {person.mother}
+              </div>
+              {(person.house || person.place) && (
+                <div className="mt-1 text-[0.7rem] font-light text-muted/80">
+                  {[person.house, person.place].filter(Boolean).join(', ')}
+                </div>
+              )}
             </dd>
           </div>
         ))}

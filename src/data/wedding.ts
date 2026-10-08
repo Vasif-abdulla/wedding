@@ -18,6 +18,10 @@ export interface Person {
   arabicName?: string
   father: string
   mother: string
+  /** Family / House name */
+  house?: string
+  /** Place / town */
+  place?: string
   /** Path under /public. Drop the real photo at this exact path. */
   image: string
   /** Single initial used by the preloader monogram */
@@ -60,6 +64,8 @@ export const groom: Person = {
   arabicName: 'سلمان الفارس',
   father: 'Kunhi Muhammed',
   mother: 'Sumayya',
+  house: 'Pathiyil House',
+  place: 'Malappuram',
   image: '/images/groom.jpg',
   initial: 'S',
 }
@@ -70,6 +76,8 @@ export const bride: Person = {
   arabicName: 'ألانا فاطمة',
   father: 'Abdul Nazeer',
   mother: 'Aneesha',
+  house: 'Ponnangathodi House',
+  place: 'Aripra',
   image: '/images/bride.jpg',
   initial: 'A',
 }
