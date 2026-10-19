@@ -24,6 +24,12 @@ export interface Person {
   place?: string
   /** Path under /public. Drop the real photo at this exact path. */
   image: string
+  /** Childhood photos for the Couple section */
+  childhoodPhotos?: {
+    src: string
+    caption?: string
+    tag?: string
+  }[]
   /** Single initial used by the preloader monogram */
   initial: string
 }
@@ -66,7 +72,11 @@ export const groom: Person = {
   mother: 'Sumayya',
   house: 'Pathiyil House',
   place: 'Malappuram',
-  image: '/images/groom.jpg',
+  image: '/images/groom1.jpeg',
+  childhoodPhotos: [
+    { src: '/images/groom1.jpeg', caption: 'Young Salman', tag: 'Toddler Days' },
+    { src: '/images/groom2.jpeg', caption: 'Growing Up', tag: 'School Days' },
+  ],
   initial: 'S',
 }
 
@@ -78,7 +88,11 @@ export const bride: Person = {
   mother: 'Aneesha',
   house: 'Ponnangathodi House',
   place: 'Aripra',
-  image: '/images/bride.jpg',
+  image: '/images/bride1.jpeg',
+  childhoodPhotos: [
+    { src: '/images/bride1.jpeg', caption: 'Little Alana', tag: 'Toddler Days' },
+    { src: '/images/bride2.jpeg', caption: 'Growing Up', tag: 'School Days' },
+  ],
   initial: 'A',
 }
 
@@ -116,6 +130,16 @@ export const couplePhotos: CouplePhoto[] = [
  * will crop the sides to fill a tall frame.
  */
 export const couplePhotoAspect = '5 / 6'
+
+/* -------------------------------------------------------------------------- */
+/*  COUPLE REFLECTION                                                          */
+/* -------------------------------------------------------------------------- */
+
+export const coupleQuote = {
+  quote:
+    '“And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquillity with them, and He has put love and mercy between your hearts.”',
+  surah: 'Surah Ar-Rum · 30:21',
+} as const
 
 /* -------------------------------------------------------------------------- */
 /*  HOSTS — the invitation is extended by the groom's grandparents             */

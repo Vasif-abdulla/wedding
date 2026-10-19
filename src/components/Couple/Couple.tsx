@@ -1,15 +1,12 @@
 import { LatticePattern } from '../ui/Ornaments'
 import { SectionHeading } from '../ui/SectionHeading'
-import { Reveal } from '../ui/Reveal'
-import { CoupleNames } from './CoupleSlider'
+import { CoupleFlanking } from './CoupleFlanking'
 
 /**
- * The Couple — one showcase, not two halves.
+ * The Couple — Concept 1: Flanking Family Showcase
  *
- * This used to be a two-column grid with the bride and groom either side of a
- * vertical divider, which set them apart on the one page meant to join them.
- * Now a slider of photos of the two of them sits above a single block carrying
- * both names and both families.
+ * Salman and Alana's ancestral lineages are flanked by their heirloom
+ * childhood portraits that glide inward from opposite sides on scroll.
  */
 export function Couple() {
   return (
@@ -33,18 +30,10 @@ export function Couple() {
           arabic="العروسان"
           title="The Couple"
           subtitle="Two families, one intention — brought together by the mercy of Allah."
-          className="mb-14 md:mb-20"
+          className="mb-12 md:mb-16"
         />
 
-        {/* Names first: they introduce the couple, and the photos below then
-            show who's just been named. */}
-        <Reveal direction="up">
-          <CoupleNames />
-        </Reveal>
-
-        {/* <Reveal direction="up" delay={0.12} className="mt-14 md:mt-16">
-          <CoupleSlider />
-        </Reveal> */}
+        <CoupleFlanking />
       </div>
     </section>
   )
