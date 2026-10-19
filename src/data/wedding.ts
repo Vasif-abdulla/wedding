@@ -72,9 +72,9 @@ export const groom: Person = {
   mother: 'Sumayya',
   house: 'Pathiyil House',
   place: 'Malappuram',
-  image: '/images/groom1.jpeg',
+  image: '/images/groom1.webp',
   childhoodPhotos: [
-    { src: '/images/groom1.jpeg', caption: 'Young Salman', tag: 'Toddler Days' },
+    { src: '/images/groom1.webp', caption: 'Young Salman', tag: 'Toddler Days' },
     { src: '/images/groom2.jpeg', caption: 'Growing Up', tag: 'School Days' },
   ],
   initial: 'S',
@@ -88,10 +88,10 @@ export const bride: Person = {
   mother: 'Aneesha',
   house: 'Ponnangathodi House',
   place: 'Aripra',
-  image: '/images/bride1.jpeg',
+  image: '/images/bride2_cropped.webp',
   childhoodPhotos: [
-    { src: '/images/bride1.jpeg', caption: 'Little Alana', tag: 'Toddler Days' },
-    { src: '/images/bride2.jpeg', caption: 'Growing Up', tag: 'School Days' },
+    { src: '/images/bride2_cropped.webp', caption: 'Little Alana', tag: 'Toddler Days' },
+    { src: '/images/bride1.jpeg', caption: 'Growing Up', tag: 'School Days' },
   ],
   initial: 'A',
 }

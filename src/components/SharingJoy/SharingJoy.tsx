@@ -1,37 +1,38 @@
-import { gsap } from 'gsap'
+import { motion } from 'framer-motion'
 import { sharingOurJoy } from '../../data/wedding'
-import { useGsapContext } from '../../hooks/useGsap'
 import { SectionHeading } from '../ui/SectionHeading'
 import { Divider, GirihPattern, Lozenge, StarEight } from '../ui/Ornaments'
+
+const listVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 22 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+}
 
 /**
  * "Sharing Our Joy" — the family standing with the couple.
  *
- * A staple of Malayali Muslim invitations, and here it's the one place GSAP
- * ScrollTrigger genuinely beats Framer Motion: a single timeline staggers every
- * name off one trigger, rather than each row paying for its own
- * IntersectionObserver and its own React re-render. It's also why the
- * Lenis↔ScrollTrigger wiring in useLenis exists.
- *
- * Set as a centred roll of names — deliberately not a grid of cards. These are
- * people, not features.
+ * Rendered with Framer Motion stagger for GPU-accelerated entrance
+ * and zero GSAP dependencies.
  */
 export function SharingJoy() {
-  const rootRef = useGsapContext<HTMLDivElement>(({ root }) => {
-    gsap.from(root.querySelectorAll('[data-joy-name]'), {
-      autoAlpha: 0,
-      y: 24,
-      duration: 0.8,
-      ease: 'power3.out',
-      stagger: 0.09, // names arrive in sequence, like a list being read aloud
-      scrollTrigger: {
-        trigger: root,
-        start: 'top 78%',
-        toggleActions: 'play none none none',
-      },
-    })
-  })
-
   return (
     <section
       id="sharing-joy"
@@ -56,10 +57,20 @@ export function SharingJoy() {
           className="mb-14"
         />
 
-        <div ref={rootRef} className="flex flex-col items-center">
-          <ul className="flex w-full max-w-xl flex-col items-center">
+        <div className="flex flex-col items-center">
+          <motion.ul
+            variants={listVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            className="flex w-full max-w-xl flex-col items-center"
+          >
             {sharingOurJoy.names.map((name, i) => (
-              <li key={name} data-joy-name className="group flex w-full flex-col items-center">
+              <motion.li
+                key={name}
+                variants={itemVariants}
+                className="group flex w-full flex-col items-center"
+              >
                 <span className="display text-center text-[clamp(1.35rem,3.2vw,1.85rem)] leading-snug text-ink transition-colors duration-500 group-hover:text-emerald">
                   {name}
                 </span>
@@ -75,9 +86,9 @@ export function SharingJoy() {
                     <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold/40" />
                   </span>
                 )}
-              </li>
+              </motion.li>
             ))}
-          </ul>
+          </motion.ul>
 
           <Divider variant="star" className="mt-12 max-w-xs" />
 

@@ -75,7 +75,7 @@ export function useMusic({ src, volume = 0.3, loop = true }: UseMusicOptions): U
       audio.src = src
     }
     audio.loop = loop
-    audio.preload = 'auto'
+    audio.preload = 'none'
     audio.volume = volume
     audioRef.current = audio
 

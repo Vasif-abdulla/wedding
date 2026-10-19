@@ -22,29 +22,29 @@ export function CoupleFlanking() {
     offset: ['start end', 'center center'],
   })
 
-  // Damped spring for smooth 120fps motion
+  // Responsive spring with higher stiffness for snappier, faster slide speed
   const smooth = useSpring(scrollYProgress, {
-    stiffness: 75,
-    damping: 24,
+    stiffness: 120,
+    damping: 20,
     restDelta: 0.001,
   })
 
-  // Safe translation range that looks dramatic on desktop while staying safe on 320px mobile
-  const leftX = useTransform(smooth, [0.05, 0.95], [-50, 0])
-  const leftOpacity = useTransform(smooth, [0.05, 0.65], [0, 1])
-  const leftRotate = useTransform(smooth, [0.05, 0.95], [-4, 0])
+  // Faster translation: completes in the first 45% of scroll with greater travel distance (-110px / +110px)
+  const leftX = useTransform(smooth, [0.0, 0.45], [-110, 0])
+  const leftOpacity = useTransform(smooth, [0.0, 0.25], [0, 1])
+  const leftRotate = useTransform(smooth, [0.0, 0.45], [-5, 0])
 
-  const rightX = useTransform(smooth, [0.05, 0.95], [50, 0])
-  const rightOpacity = useTransform(smooth, [0.05, 0.65], [0, 1])
-  const rightRotate = useTransform(smooth, [0.05, 0.95], [4, 0])
+  const rightX = useTransform(smooth, [0.0, 0.45], [110, 0])
+  const rightOpacity = useTransform(smooth, [0.0, 0.25], [0, 1])
+  const rightRotate = useTransform(smooth, [0.0, 0.45], [5, 0])
 
-  // Central Khatim seal scale & opacity
-  const centerScale = useTransform(smooth, [0.35, 0.95], [0.65, 1])
-  const centerOpacity = useTransform(smooth, [0.25, 0.75], [0, 1])
+  // Central Khatim seal arrives promptly with the images
+  const centerScale = useTransform(smooth, [0.15, 0.48], [0.5, 1])
+  const centerOpacity = useTransform(smooth, [0.12, 0.35], [0, 1])
 
   // Toddler childhood portraits
-  const groomPhoto = groom.childhoodPhotos?.[0] ?? { src: '/images/groom1.jpeg', caption: 'Young Salman' }
-  const bridePhoto = bride.childhoodPhotos?.[0] ?? { src: '/images/bride1.jpeg', caption: 'Little Alana' }
+  const groomPhoto = groom.childhoodPhotos?.[0] ?? { src: '/images/groom1.webp', caption: 'Young Salman' }
+  const bridePhoto = bride.childhoodPhotos?.[0] ?? { src: '/images/bride2_cropped.webp', caption: 'Little Alana' }
 
   return (
     <div ref={containerRef} className="relative w-full max-w-5xl mx-auto overflow-hidden px-1">
